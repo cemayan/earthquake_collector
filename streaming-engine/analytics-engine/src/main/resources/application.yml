@@ -1,0 +1,11 @@
+kafka:
+  bootstrapServers: kafka_cayan:9092
+  bootstrapServersTest: localhost:9092
+  topicId: earthquake
+  groupId: earthquake
+flink:
+  timeWindow: 1
+
+
+server:
+  port: 8090

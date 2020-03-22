@@ -1,0 +1,55 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    hostname: zk_cayan
+    container_name: zk_cayan
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka:latest
+    hostname: kafka_cayan
+    container_name: kafka_cayan
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zk_cayan:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_CREATE_TOPICS: "earthquake:1:1,analyzedTopic:1:1,token-service:1:1,user-conf:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  scraper:
+    build: ./scraper
+    ports:
+      - "8085:8085"
+  analytics-engine:
+      container_name: analytics-engine
+      hostname: analytics-engine
+      build:
+        context: ./streaming-engine/
+        dockerfile: Dockerfile
+      volumes:
+        - /data/springboot-docker-compose-app
+      ports:
+        - "8090:8090"    
+  db:
+    container_name: mysql
+    hostname: mysql
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: test
+    ports: 
+      - 3306:3306  
+  expo-server:
+    container_name: expo-server
+    hostname: expo-server
+    build:
+        context: ./expo-server/
+        dockerfile: Dockerfile
+    ports: 
+      - 3000:3000

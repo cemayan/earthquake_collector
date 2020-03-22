@@ -1,0 +1,107 @@
+version: '2'
+services:
+  service-discovery-server:
+    hostname: service-discovery-server
+    container_name: service-discovery-server
+    build:
+      context: ./service-discovery-server/
+      dockerfile: Dockerfile
+    volumes:
+      - /data/springboot-docker-compose-app
+    ports:
+      - "8761:8761"
+    networks:
+      - earthquake_collector_default
+  db-service:
+     hostname: db-service
+     container_name: db-service
+     depends_on:
+       - service-discovery-server
+     build:
+       context: ./db-service/
+       dockerfile: Dockerfile
+     volumes:
+       - /data/springboot-docker-compose-app
+     ports:
+       - "8078:8078"
+     networks:
+       - earthquake_collector_default
+     restart: on-failure
+  push-service:
+      hostname: push-service
+      container_name: push-service
+      depends_on:
+        - service-discovery-server
+      build:
+        context: ./push-service/
+        dockerfile: Dockerfile
+      volumes:
+        - /data/springboot-docker-compose-app
+      ports:
+        - "8075:8075"
+      networks:
+        - earthquake_collector_default
+      restart: on-failure
+  token-server:
+      hostname: token-service
+      container_name: token-service
+      depends_on:
+        - service-discovery-server
+      build:
+        context: ./token-service/
+        dockerfile: Dockerfile
+      volumes:
+        - /data/springboot-docker-compose-app
+      ports:
+        - "8076:8076"
+      networks:
+        - earthquake_collector_default
+      restart: on-failure
+  user-config:
+      hostname: user-config
+      container_name: user-config
+      depends_on:
+       - service-discovery-server
+      build:
+        context: ./user-config/
+        dockerfile: Dockerfile
+      volumes:
+        - /data/springboot-docker-compose-app
+      ports:
+        - "8077:8077"
+      networks:
+        - earthquake_collector_default
+      restart: on-failure
+  api-gateway:
+    hostname: api-gateway
+    depends_on:
+      - service-discovery-server
+    container_name: api-gateway
+    build:
+      context: ./api-gateway/
+      dockerfile: Dockerfile
+    volumes:
+      - /data/springboot-docker-compose-app
+    ports:
+      - "8762:8762"
+    networks:
+        - earthquake_collector_default
+    restart: on-failure
+#  test:
+#      hostname: test
+#      container_name: test
+#      build:
+#        context: ./test/
+#        dockerfile: Dockerfile
+#      volumes:
+#        - /data/springboot-docker-compose-app
+#      ports:
+#        - "8045:8045"
+#      networks:
+#        - earthquake_collector_default
+#      depends_on:
+#        - service-discovery-server
+#      restart: always
+networks:
+  earthquake_collector_default:
+    external: true

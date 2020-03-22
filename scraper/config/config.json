@@ -1,0 +1,6 @@
+{
+  "ScheduleUnit": "MINUTE",
+  "ScheduleInterval": 1,
+  "TopicId": "earthquake",
+  "BootstrapServer": "kafka_cayan:9094"
+}
